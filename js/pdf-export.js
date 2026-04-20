@@ -1,8 +1,8 @@
 /**
  * pdf-export.js
  * Genera y descarga el reporte PDF del perfil vocacional.
- * Utiliza jsPDF para construir un documento de 2 páginas
- * con diseño oscuro, gráficos vectoriales y carreras recomendadas.
+ * Modelo de scoring: RANKING (4-3-2-1 pts por posición).
+ * Máximo por inteligencia: 5 preguntas × 4 pts = 20 pts.
  *
  * Depende de: data.js, assessment.js, jsPDF (CDN)
  */
@@ -114,7 +114,7 @@ function drawCoverHeader(doc, margin) {
   setTextColor(doc, '#8b90a8');
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
-  doc.text('Basado en la Teoría de Howard Gardner', margin, 86);
+  doc.text('Basado en la Teoría de Howard Gardner · Modelo de Ranking', margin, 86);
 
   // Separador
   setDraw(doc, '#1c1f35');

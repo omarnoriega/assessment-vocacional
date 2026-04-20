@@ -101,6 +101,34 @@ body {
   margin-bottom: 24px; clear: both;
 }
 
+/* ── RANKING HINT ── */
+.rank-hint {
+  font-size: .82rem; color: var(--muted);
+  margin-bottom: 18px; line-height: 1.5;
+  padding: 10px 14px;
+  background: rgba(108,99,255,.07);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+}
+
+/* ── RANK PROGRESS STEPS ── */
+.rank-steps {
+  display: flex; align-items: center; gap: 8px; margin-top: 16px; flex-wrap: wrap;
+}
+.rank-step {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 700; color: var(--muted);
+  transition: all .3s cubic-bezier(.4,0,.2,1);
+  flex-shrink: 0;
+}
+.rank-step.done { color: #fff; transform: scale(1.1); }
+.rank-step-label {
+  font-size: .8rem; color: var(--muted); margin-left: 4px;
+  font-style: italic;
+}
+
 /* ── OPTIONS ── */
 .options { display: grid; gap: 10px; }
 .option {
@@ -114,33 +142,38 @@ body {
   user-select: none;
   position: relative; overflow: hidden;
 }
-.option::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  opacity: 0; transition: opacity .2s;
+.option:hover { border-color: rgba(108,99,255,.4); transform: translateX(4px); }
+.option.ranked {
+  border-color: var(--rank-color, var(--accent));
+  background: color-mix(in srgb, var(--rank-color, var(--accent)) 10%, transparent);
 }
-.option:hover { border-color: rgba(108,99,255,.5); transform: translateX(4px); }
-.option.selected {
-  border-color: var(--accent);
-  background: rgba(108,99,255,.12);
+.option-rank-badge {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 800;
+  flex-shrink: 0; color: transparent;
+  transition: all .25s cubic-bezier(.4,0,.2,1);
+  position: relative; z-index: 1;
 }
-.option.selected::before { opacity: 0.06; }
-.option-dot {
-  width: 20px; height: 20px; border-radius: 50%;
-  border: 2px solid var(--muted);
-  flex-shrink: 0; position: relative; z-index:1;
-  transition: all .2s;
+.option-rank-badge.visible {
+  color: #fff;
+  transform: scale(1.1);
 }
-.option.selected .option-dot {
-  border-color: var(--accent);
-  background: var(--accent);
-  box-shadow: 0 0 0 4px rgba(108,99,255,.25);
+.option-text {
+  font-size: .95rem; line-height: 1.4;
+  position: relative; z-index: 1;
+  flex: 1;
 }
-.option.selected .option-dot::after {
-  content: ''; position: absolute;
-  inset: 4px; border-radius: 50%; background: #fff;
+.option-remove {
+  font-size: .75rem; color: var(--muted);
+  padding: 3px 7px; border-radius: 100px;
+  background: rgba(255,255,255,.06);
+  transition: all .2s; z-index: 1;
+  flex-shrink: 0;
 }
-.option-text { font-size: .95rem; line-height: 1.4; position: relative; z-index:1; }
+.option-remove:hover { background: rgba(255,107,157,.2); color: var(--accent2); }
 
 /* ── NAV ── */
 .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; gap: 12px; }

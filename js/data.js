@@ -1,8 +1,12 @@
 /**
  * data.js
  * Datos estáticos del assessment vocacional.
- * Contiene: inteligencias, preguntas, mapa de puntaje,
- * carreras recomendadas y perfiles de personalidad.
+ * Modelo de scoring: RANKING (4-3-2-1 pts por posición).
+ *
+ * Cada pregunta tiene 4 opciones. El estudiante las ordena
+ * de mayor a menor preferencia (1° = 4 pts, 2° = 3 pts,
+ * 3° = 2 pts, 4° = 1 pt). El máximo por inteligencia es
+ * 5 preguntas × 4 pts = 20 pts.
  *
  * Basado en la Teoría de las Inteligencias Múltiples
  * de Howard Gardner (1983).
@@ -82,54 +86,66 @@ const QUESTIONS = [
 ];
 
 /**
- * Mapa de puntaje por pregunta.
- * Cada entrada es un array de 4 pares [inteligencia, puntos]
- * correspondientes a las 4 opciones de respuesta (índice 0–3).
- * Puntos posibles: 3 (respuesta principal), 2 (secundaria), 1 (terciaria).
- * Máximo por inteligencia: 5 preguntas × 3 pts = 15 pts.
+ * SCORE_MAP — Modelo de Ranking (4-3-2-1)
+ *
+ * Cada entrada es un array de 4 pares [inteligenciaId, inteligenciaId]
+ * que indica QUÉ inteligencia está asociada a cada opción (índice 0-3).
+ * Los PUNTOS los determina la posición que el estudiante asigne:
+ *   posición 0 (1° lugar) → 4 pts
+ *   posición 1 (2° lugar) → 3 pts
+ *   posición 2 (3° lugar) → 2 pts
+ *   posición 3 (4° lugar) → 1 pt
+ *
+ * Máximo posible por inteligencia: 5 preguntas × 4 pts = 20 pts
  */
 const SCORE_MAP = {
-  1:  [['LI',3],['ES',2],['CK',1],['LI',2]],
-  2:  [['LI',3],['LM',2],['MU',2],['CK',2]],
-  3:  [['LI',3],['LM',2],['ES',2],['IP',1]],
-  4:  [['LI',3],['LM',2],['CK',2],['NA',2]],
-  5:  [['LI',3],['LM',2],['ES',2],['NA',2]],
-  6:  [['LM',3],['IP',2],['IT',2],['NA',2]],
-  7:  [['LM',3],['MU',2],['CK',2],['LI',2]],
-  8:  [['LM',3],['ES',2],['IP',2],['MU',2]],
-  9:  [['LM',3],['NA',2],['IT',2],['IP',2]],
-  10: [['LM',3],['LI',2],['CK',2],['NA',2]],
-  11: [['ES',3],['LI',2],['IP',2],['MU',1]],
-  12: [['ES',3],['IP',2],['LM',2],['IT',2]],
-  13: [['ES',3],['LM',2],['MU',2],['IP',2]],
-  14: [['ES',3],['LI',2],['CK',2],['NA',2]],
-  15: [['ES',3],['LI',2],['MU',2],['NA',2]],
-  16: [['MU',3],['LM',2],['CK',2],['ES',2]],
-  17: [['MU',3],['LI',2],['IT',2],['MU',2]],
-  18: [['MU',3],['LI',2],['CK',2],['ES',2]],
-  19: [['MU',2],['LI',2],['IP',3],['LM',2]],
-  20: [['MU',3],['LI',2],['CK',2],['IP',2]],
-  21: [['CK',3],['LI',2],['ES',2],['IP',2]],
-  22: [['CK',3],['LM',2],['ES',2],['LI',2]],
-  23: [['CK',3],['LI',2],['IP',2],['NA',2]],
-  24: [['CK',3],['LM',2],['IP',2],['NA',2]],
-  25: [['CK',3],['ES',2],['LI',2],['MU',2]],
-  26: [['NA',3],['ES',2],['LM',2],['IP',2]],
-  27: [['NA',3],['LM',2],['ES',2],['IP',2]],
-  28: [['NA',3],['LM',2],['ES',2],['IP',2]],
-  29: [['NA',3],['LM',2],['ES',2],['IP',2]],
-  30: [['NA',3],['ES',2],['IP',2],['LM',2]],
-  31: [['IP',3],['ES',2],['LM',2],['NA',2]],
-  32: [['IP',3],['LM',2],['NA',2],['IT',2]],
-  33: [['IP',3],['LM',2],['CK',2],['IT',2]],
-  34: [['IP',3],['LI',2],['ES',2],['LM',2]],
-  35: [['IP',3],['LI',2],['NA',2],['LM',2]],
-  36: [['IT',3],['IP',2],['LM',2],['LI',2]],
-  37: [['IT',3],['LM',2],['IP',2],['CK',2]],
-  38: [['IT',3],['LM',2],['IP',2],['NA',2]],
-  39: [['IT',3],['LM',2],['IP',2],['NA',2]],
-  40: [['IT',3],['LM',2],['IP',2],['CK',2]],
+  1:  ['LI','ES','CK','LI'],
+  2:  ['LI','LM','MU','CK'],
+  3:  ['LI','LM','ES','IP'],
+  4:  ['LI','LM','CK','NA'],
+  5:  ['LI','LM','ES','NA'],
+  6:  ['LM','IP','IT','NA'],
+  7:  ['LM','MU','CK','LI'],
+  8:  ['LM','ES','IP','MU'],
+  9:  ['LM','NA','IT','IP'],
+  10: ['LM','LI','CK','NA'],
+  11: ['ES','LI','IP','MU'],
+  12: ['ES','IP','LM','IT'],
+  13: ['ES','LM','MU','IP'],
+  14: ['ES','LI','CK','NA'],
+  15: ['ES','LI','MU','NA'],
+  16: ['MU','LM','CK','ES'],
+  17: ['MU','LI','IT','MU'],
+  18: ['MU','LI','CK','ES'],
+  19: ['MU','LI','IP','LM'],
+  20: ['MU','LI','CK','IP'],
+  21: ['CK','LI','ES','IP'],
+  22: ['CK','LM','ES','LI'],
+  23: ['CK','LI','IP','NA'],
+  24: ['CK','LM','IP','NA'],
+  25: ['CK','ES','LI','MU'],
+  26: ['NA','ES','LM','IP'],
+  27: ['NA','LM','ES','IP'],
+  28: ['NA','LM','ES','IP'],
+  29: ['NA','LM','ES','IP'],
+  30: ['NA','ES','IP','LM'],
+  31: ['IP','ES','LM','NA'],
+  32: ['IP','LM','NA','IT'],
+  33: ['IP','LM','CK','IT'],
+  34: ['IP','LI','ES','LM'],
+  35: ['IP','LI','NA','LM'],
+  36: ['IT','IP','LM','LI'],
+  37: ['IT','LM','IP','CK'],
+  38: ['IT','LM','IP','NA'],
+  39: ['IT','LM','IP','NA'],
+  40: ['IT','LM','IP','CK'],
 };
+
+// Puntos por posición de ranking (índice = posición asignada)
+const RANK_POINTS = [4, 3, 2, 1];
+
+// Máximo posible por inteligencia en modelo ranking
+const MAX_SCORE_PER_INTELLIGENCE = 20; // 5 preguntas × 4 pts
 
 // ── Carreras recomendadas ────────────────────────────────────────────────────
 const CAREERS = [

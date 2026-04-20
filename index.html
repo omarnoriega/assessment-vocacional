@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assessment Vocacional · Descubre tu Potencial</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0d0f1a;
+    --surface: #141625;
+    --surface2: #1c1f35;
+    --border: rgba(255,255,255,0.07);
+    --accent: #6c63ff;
+    --accent2: #ff6b9d;
+    --accent3: #43e8c2;
+    --accent4: #f7b731;
+    --text: #e8eaf0;
+    --muted: #8b90a8;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND ── */
+  .bg-orbs {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  }
+  .orb {
+    position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.18;
+  }
+  .orb1 { width:500px;height:500px;background:var(--accent);top:-150px;right:-100px; }
+  .orb2 { width:400px;height:400px;background:var(--accent2);bottom:-100px;left:-100px; }
+  .orb3 { width:300px;height:300px;background:var(--accent3);top:40%;left:50%;transform:translate(-50%,-50%); }
+
+  /* ── LAYOUT ── */
+  .app { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  /* ── HEADER ── */
+  .hero { text-align: center; margin-bottom: 60px; animation: fadeUp .8s ease both; }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(108,99,255,.15);
+    border: 1px solid rgba(108,99,255,.4);
+    color: var(--accent);
+    font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 18px; border-radius: 100px; margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    line-height: 1.1;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero p {
+    color: var(--muted); font-size: 1.05rem; max-width: 520px; margin: 0 auto 30px; line-height: 1.7;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-wrap { background: var(--surface2); border-radius: 100px; height: 6px; margin-bottom: 10px; overflow:hidden; }
+  .progress-bar {
+    height: 100%; border-radius: 100px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+  .progress-label { font-size: 13px; color: var(--muted); text-align: right; margin-bottom: 32px; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 40px;
+    margin-bottom: 24px;
+    animation: fadeUp .5s ease both;
+    transition: border-color .3s;
+  }
+  .card:hover { border-color: rgba(108,99,255,.3); }
+
+  .q-num {
+    font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 10px;
+  }
+  .q-intl {
+    font-size: 11px; color: var(--muted); float: right; margin-bottom: 0;
+    background: rgba(108,99,255,.1); padding: 2px 10px; border-radius: 100px;
+  }
+  .q-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; line-height: 1.5;
+    margin-bottom: 24px; clear: both;
+  }
+
+  /* ── OPTIONS ── */
+  .options { display: grid; gap: 10px; }
+  .option {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 14px;
+    transition: all .2s ease;
+    user-select: none;
+    position: relative; overflow: hidden;
+  }
+  .option::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    opacity: 0; transition: opacity .2s;
+  }
+  .option:hover { border-color: rgba(108,99,255,.5); transform: translateX(4px); }
+  .option.selected {
+    border-color: var(--accent);
+    background: rgba(108,99,255,.12);
+  }
+  .option.selected::before { opacity: 0.06; }
+  .option-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--muted);
+    flex-shrink: 0; position: relative; z-index:1;
+    transition: all .2s;
+  }
+  .option.selected .option-dot {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(108,99,255,.25);
+  }
+  .option.selected .option-dot::after {
+    content: ''; position: absolute;
+    inset: 4px; border-radius: 50%; background: #fff;
+  }
+  .option-text { font-size: .95rem; line-height: 1.4; position: relative; z-index:1; }
+
+  /* ── NAV ── */
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; gap: 12px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 28px; border-radius: 100px; font-size: .95rem;
+    font-weight: 600; cursor: pointer; border: none; transition: all .2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-ghost {
+    background: transparent; color: var(--muted);
+    border: 1.5px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #9d55ff);
+    color: #fff;
+    box-shadow: 0 4px 24px rgba(108,99,255,.4);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(108,99,255,.5); }
+  .btn-primary:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+  .btn-submit {
+    background: linear-gradient(135deg, var(--accent3), #1dd1a1);
+    color: #0d0f1a; flex: 1;
+    box-shadow: 0 4px 24px rgba(67,232,194,.3);
+  }
+  .btn-submit:hover { transform: translateY(-2px); }
+
+  /* ── RESULTS ── */
+  #results { display: none; animation: fadeUp .7s ease both; }
+  .result-header { text-align: center; margin-bottom: 50px; }
+  .result-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    background: linear-gradient(135deg, #fff, var(--accent3));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  .result-header p { color: var(--muted); font-size: 1rem; }
+
+  /* ── RADAR / BAR SECTION ── */
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px; }
+  @media(max-width:640px){ .charts-grid { grid-template-columns: 1fr; } }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
+  .chart-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 20px; color: var(--text); }
+
+  /* ── BARS ── */
+  .bar-list { display: flex; flex-direction: column; gap: 14px; }
+  .bar-item {}
+  .bar-label { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 6px; }
+  .bar-label span:first-child { color: var(--text); font-weight: 500; }
+  .bar-label span:last-child { color: var(--muted); font-weight: 600; }
+  .bar-track { background: var(--surface2); border-radius: 100px; height: 8px; overflow:hidden; }
+  .bar-fill {
+    height: 100%; border-radius: 100px;
+    transition: width 1.2s cubic-bezier(.4,0,.2,1);
+    width: 0;
+  }
+
+  /* ── RADAR SVG ── */
+  .radar-wrap { display: flex; justify-content: center; }
+
+  /* ── STRENGTH / WEAKNESS ── */
+  .sw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px; }
+  @media(max-width:520px){ .sw-grid { grid-template-columns: 1fr; } }
+
+  .sw-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+  .sw-card.strengths { border-top: 3px solid var(--accent3); }
+  .sw-card.weaknesses { border-top: 3px solid var(--accent2); }
+  .sw-card h3 { font-size: .9rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+  .sw-card.strengths h3 { color: var(--accent3); }
+  .sw-card.weaknesses h3 { color: var(--accent2); }
+  .sw-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 100px; font-size: .82rem;
+    margin: 4px 3px; font-weight: 500;
+  }
+  .sw-tag.s { background: rgba(67,232,194,.12); color: var(--accent3); border: 1px solid rgba(67,232,194,.25); }
+  .sw-tag.w { background: rgba(255,107,157,.12); color: var(--accent2); border: 1px solid rgba(255,107,157,.25); }
+
+  /* ── CAREERS ── */
+  .careers-section { margin-bottom: 30px; }
+  .careers-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; margin-bottom: 20px;
+  }
+  .career-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .career-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px;
+    transition: all .25s; cursor: default;
+    position: relative; overflow: hidden;
+  }
+  .career-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .career-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,.15); }
+  .career-icon { font-size: 1.8rem; margin-bottom: 10px; }
+  .career-name { font-weight: 600; font-size: .95rem; margin-bottom: 4px; }
+  .career-intel { font-size: .78rem; color: var(--muted); }
+  .career-match {
+    position: absolute; top: 14px; right: 14px;
+    font-size: .7rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 100px;
+  }
+
+  /* ── PROFILE LABEL ── */
+  .profile-badge {
+    text-align: center; margin-bottom: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px;
+  }
+  .profile-badge .profile-icon { font-size: 3rem; margin-bottom: 10px; }
+  .profile-badge h2 {
+    font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 6px;
+  }
+  .profile-badge p { color: var(--muted); font-size: .95rem; max-width: 500px; margin: 0 auto; line-height: 1.6; }
+
+  .btn-restart {
+    background: var(--surface2); color: var(--text);
+    border: 1.5px solid var(--border); padding: 13px 32px;
+    border-radius: 100px; font-size: .95rem; font-weight: 600;
+    cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif;
+  }
+  .btn-restart:hover { border-color: var(--accent); color: var(--accent); }
+
+  .result-actions {
+    display: flex; justify-content: center; align-items: center;
+    gap: 14px; margin-top: 40px; flex-wrap: wrap;
+  }
+  .btn-pdf {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, #ff6b9d, #e84393);
+    color: #fff; border: none; padding: 14px 32px;
+    border-radius: 100px; font-size: .95rem; font-weight: 700;
+    cursor: pointer; transition: all .25s; font-family: 'DM Sans', sans-serif;
+    box-shadow: 0 4px 24px rgba(255,107,157,.35);
+    position: relative; overflow: hidden;
+  }
+  .btn-pdf::before {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(255,255,255,.1); opacity: 0; transition: opacity .2s;
+  }
+  .btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,107,157,.5); }
+  .btn-pdf:hover::before { opacity: 1; }
+  .btn-pdf:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  .btn-pdf .pdf-icon { font-size: 1.1rem; }
+
+  .pdf-toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #1c1f35; border: 1px solid rgba(67,232,194,.4);
+    color: #43e8c2; padding: 12px 24px; border-radius: 100px;
+    font-size: .9rem; font-weight: 600; z-index: 9999;
+    transition: transform .4s cubic-bezier(.4,0,.2,1), opacity .4s;
+    opacity: 0; display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  }
+  .pdf-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ── SECTION DIVIDER ── */
+  .section-divider { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(20px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  /* ── INTRO SCREEN ── */
+  #intro { text-align: center; padding: 20px 0 40px; }
+  .intel-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    margin: 36px 0; text-align: center;
+  }
+  @media(max-width:500px){ .intel-grid { grid-template-columns: repeat(2,1fr); } }
+  .intel-chip {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 8px; font-size: .8rem;
+    font-weight: 500; transition: all .2s;
+  }
+  .intel-chip:hover { border-color: rgba(108,99,255,.4); }
+  .intel-chip .ic-emoji { font-size: 1.4rem; display: block; margin-bottom: 6px; }
+
+  .intro-stats { display: flex; justify-content: center; gap: 32px; margin: 30px 0; }
+  .intro-stat { text-align: center; }
+  .intro-stat .val { font-size: 1.8rem; font-weight: 700; color: var(--accent); font-family: 'Playfair Display', serif; }
+  .intro-stat .lbl { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<div class="app">
+
+  <!-- INTRO -->
+  <div id="intro">
+    <div class="hero">
+      <div class="hero-badge">Orientación Vocacional</div>
+      <h1>Descubre tu<br><em>perfil de inteligencias</em></h1>
+      <p>Un assessment científicamente fundamentado en la Teoría de las Inteligencias Múltiples de Howard Gardner para identificar tus fortalezas y orientarte hacia carreras afines.</p>
+    </div>
+
+    <div class="intel-grid">
+      <div class="intel-chip"><span class="ic-emoji">📚</span>Lingüística</div>
+      <div class="intel-chip"><span class="ic-emoji">🔢</span>Lógico-Matemática</div>
+      <div class="intel-chip"><span class="ic-emoji">🎨</span>Espacial</div>
+      <div class="intel-chip"><span class="ic-emoji">🎵</span>Musical</div>
+      <div class="intel-chip"><span class="ic-emoji">🏃</span>Corporal-Kinestésica</div>
+      <div class="intel-chip"><span class="ic-emoji">🌿</span>Naturalista</div>
+      <div class="intel-chip"><span class="ic-emoji">🤝</span>Interpersonal</div>
+      <div class="intel-chip"><span class="ic-emoji">🧘</span>Intrapersonal</div>
+    </div>
+
+    <div class="intro-stats">
+      <div class="intro-stat"><div class="val">40</div><div class="lbl">Preguntas</div></div>
+      <div class="intro-stat"><div class="val">8</div><div class="lbl">Inteligencias</div></div>
+      <div class="intro-stat"><div class="val">~12</div><div class="lbl">Minutos</div></div>
+    </div>
+
+    <button class="btn btn-primary" style="font-size:1.05rem;padding:16px 40px;" onclick="startAssessment()">
+      Comenzar Assessment →
+    </button>
+  </div>
+
+  <!-- ASSESSMENT -->
+  <div id="assessment" style="display:none;">
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-label" id="progressLabel">Pregunta 1 de 40</div>
+    <div id="questionContainer"></div>
+    <div class="nav">
+      <button class="btn btn-ghost" id="btnPrev" onclick="prevQ()">← Anterior</button>
+      <button class="btn btn-primary" id="btnNext" onclick="nextQ()" disabled>Siguiente →</button>
+      <button class="btn btn-submit" id="btnSubmit" style="display:none;" onclick="showResults()">Ver mis resultados ✦</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="result-header">
+      <h2>Tu Perfil Vocacional</h2>
+      <p>Basado en tus respuestas, aquí está tu mapa de inteligencias y orientación de carrera</p>
+    </div>
+
+    <div class="profile-badge" id="profileBadge"></div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>📊 Puntuación por Inteligencia</h3>
+        <div class="bar-list" id="barChart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>🕸 Mapa Radar</h3>
+        <div class="radar-wrap"><canvas id="radarCanvas" width="260" height="260"></canvas></div>
+      </div>
+    </div>
+
+    <div class="sw-grid">
+      <div class="sw-card strengths">
+        <h3>⚡ Fortalezas</h3>
+        <div id="strengthsContainer"></div>
+      </div>
+      <div class="sw-card weaknesses">
+        <h3>🌱 Áreas de Mejora</h3>
+        <div id="weaknessesContainer"></div>
+      </div>
+    </div>
+
+    <div class="careers-section">
+      <h3>🎯 Carreras recomendadas para ti</h3>
+      <div class="career-grid" id="careerGrid"></div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-pdf" id="btnExportPdf" onclick="exportPDF()">
+        <span class="pdf-icon">📄</span> Exportar resultado en PDF
+      </button>
+      <button class="btn-restart" onclick="restartAssessment()">↩ Volver a comenzar</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="pdf-toast" id="pdfToast">✓ PDF descargado exitosamente</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+
+const INTELLIGENCES = [
+  { id:'LI', name:'Lingüística',           emoji:'📚', color:'#6c63ff', desc:'Manejo del lenguaje oral y escrito' },
+  { id:'LM', name:'Lógico-Matemática',     emoji:'🔢', color:'#43e8c2', desc:'Razonamiento lógico y numérico' },
+  { id:'ES', name:'Espacial',              emoji:'🎨', color:'#ff6b9d', desc:'Visualización y pensamiento en 3D' },
+  { id:'MU', name:'Musical',               emoji:'🎵', color:'#f7b731', desc:'Sensibilidad al ritmo y melodía' },
+  { id:'CK', name:'Corporal-Kinestésica',  emoji:'🏃', color:'#ff9f43', desc:'Coordinación y habilidad física' },
+  { id:'NA', name:'Naturalista',           emoji:'🌿', color:'#1dd1a1', desc:'Comprensión del mundo natural' },
+  { id:'IP', name:'Interpersonal',         emoji:'🤝', color:'#fd9644', desc:'Empatía y relaciones sociales' },
+  { id:'IT', name:'Intrapersonal',         emoji:'🧘', color:'#a29bfe', desc:'Autoconocimiento y reflexión' },
+];
+
+const QUESTIONS = [
+  // LINGÜÍSTICA (5)
+  { id:1,  intel:'LI', text:'Cuando tienes que explicar algo complicado a un amigo, prefieres...', opts:['Escribirlo con detalle en un mensaje','Dibujarlo o hacer un esquema visual','Mostrarlo con un ejemplo físico o actuado','Decirlo de viva voz improvisando'] },
+  { id:2,  intel:'LI', text:'¿Cuál de estas actividades disfrutas más en tu tiempo libre?', opts:['Leer libros, blogs o artículos','Resolver rompecabezas o juegos de lógica','Escuchar música o tocar un instrumento','Hacer deporte o manualidades'] },
+  { id:3,  intel:'LI', text:'Al presentar un trabajo escolar, lo que más te importa es...', opts:['Que el texto sea claro y bien redactado','Que los datos y cifras sean precisos','Que el diseño visual sea atractivo','Que la presentación oral sea fluida'] },
+  { id:4,  intel:'LI', text:'Si pudieras elegir un club escolar, elegirías...', opts:['Club de debate o periodismo escolar','Club de matemáticas o programación','Club de teatro o danza','Club de ecología o naturaleza'] },
+  { id:5,  intel:'LI', text:'Aprendes mejor cuando el profesor...', opts:['Explica con historias y metáforas','Usa fórmulas, gráficas y ejercicios','Hace maquetas o mapas mentales visuales','Propone experimentos o salidas de campo'] },
+
+  // LÓGICO-MATEMÁTICA (5)
+  { id:6,  intel:'LM', text:'Ante un problema nuevo, tu primer instinto es...', opts:['Buscar un patrón o regla general','Pedir opinión a varias personas','Confiar en tu intuición y sentir','Observar la naturaleza para inspirarte'] },
+  { id:7,  intel:'LM', text:'¿Cuál de estos juegos o aplicaciones te divierte más?', opts:['Sudoku, ajedrez o juegos de estrategia','Karaoke o juegos de ritmo','Videojuegos de acción y habilidad física','Trivia o crucigramas de palabras'] },
+  { id:8,  intel:'LM', text:'Si tuvieras que organizar un evento, priorizarías...', opts:['Crear un presupuesto y cronograma detallado','Diseñar la decoración y la estética','Coordinar a las personas y animar el ambiente','Elegir la música y la ambientación sonora'] },
+  { id:9,  intel:'LM', text:'Tu reacción al ver noticias de ciencia es...', opts:['Analizar las cifras y estadísticas','Ver si hay un impacto ambiental','Preguntarte qué sientes al respecto','Compartirlo y discutirlo con amigos'] },
+  { id:10, intel:'LM', text:'¿Qué asignatura disfrutas más?', opts:['Matemáticas o Física','Lengua y Literatura','Educación Física o Arte','Biología o Geografía'] },
+
+  // ESPACIAL (5)
+  { id:11, intel:'ES', text:'Cuando lees instrucciones, prefieres...', opts:['Ver un diagrama o ilustración paso a paso','Leer el texto detalladamente','Que alguien te lo explique en persona','Escuchar un audio o podcast'] },
+  { id:12, intel:'ES', text:'En un viaje nuevo, tú normalmente...', opts:['Memorizas el mapa mentalmente sin perderte','Preguntas a la gente del lugar','Sigues las indicaciones del GPS sin más','Prefieres ir descubriendo sin planear'] },
+  { id:13, intel:'ES', text:'Si tienes que decorar tu cuarto, lo que más disfrutas es...', opts:['Diseñar la distribución y combinación de colores','Calcular el espacio y las medidas exactas','Poner música de fondo mientras lo haces','Hacerlo con amigos o familia'] },
+  { id:14, intel:'ES', text:'¿Cuál de estos proyectos te entusiasma más?', opts:['Diseñar un videojuego o aplicación visualmente','Escribir un guion o historia','Coreografiar un baile o rutina de ejercicio','Criar plantas o animales'] },
+  { id:15, intel:'ES', text:'Al ver una película, lo que más te llama la atención es...', opts:['La fotografía, los colores y el diseño visual','La historia y los diálogos','La banda sonora y los efectos de sonido','Los escenarios naturales y paisajes'] },
+
+  // MUSICAL (5)
+  { id:16, intel:'MU', text:'Cuando estudias, habitualmente...', opts:['Pones música de fondo que te ayuda a concentrarte','Necesitas silencio absoluto','Te mueves o cambias de postura con frecuencia','Organizas el espacio visualmente antes de empezar'] },
+  { id:17, intel:'MU', text:'Si escuchas una canción nueva, lo primero que notas es...', opts:['El ritmo y los instrumentos','La letra y las palabras','Las emociones que te genera','El género y estilo musical'] },
+  { id:18, intel:'MU', text:'¿Cuál de estos talentos te gustaría desarrollar?', opts:['Componer o producir música','Escribir poesía o narrativa','Bailar o hacer artes marciales','Fotografiar o editar vídeo'] },
+  { id:19, intel:'MU', text:'En un trabajo grupal, sueles ser quien...', opts:['Propone un jingle o dinámica sonora para presentar','Redacta el informe final','Presenta de forma oral y anima al grupo','Organiza el cronograma y distribuye tareas'] },
+  { id:20, intel:'MU', text:'¿Cómo procesas mejor una emoción fuerte?', opts:['Escuchando o tocando música','Escribiendo en un diario','Haciendo actividad física intensa','Hablándolo con alguien de confianza'] },
+
+  // CORPORAL-KINESTÉSICA (5)
+  { id:21, intel:'CK', text:'Para aprender algo nuevo, prefieres...', opts:['Hacerlo con tus propias manos o practicarlo directamente','Leer un manual o tutorial escrito','Ver un vídeo explicativo','Que alguien te guíe mientras lo haces'] },
+  { id:22, intel:'CK', text:'¿Qué actividad te da más satisfacción?', opts:['Terminar un entrenamiento deportivo o de baile','Resolver un problema matemático complejo','Crear una obra artística o musical','Comprender un concepto filosófico difícil'] },
+  { id:23, intel:'CK', text:'En tus tiempos libres, tienes tendencia a...', opts:['Moverte, no puedes estar quieto mucho tiempo','Quedarte leyendo o escribiendo','Buscar grupos para conversar y socializar','Observar la naturaleza o tus alrededores'] },
+  { id:24, intel:'CK', text:'¿Cuál de estos trabajos te imaginas haciendo felizmente?', opts:['Cirujano, fisioterapeuta o entrenador deportivo','Ingeniero, programador o analista','Maestro, psicólogo o trabajador social','Biólogo, geólogo o veterinario'] },
+  { id:25, intel:'CK', text:'Cuando alguien te explica algo, comprendes mejor si...', opts:['Te permiten tocar, hacer o simular el proceso','Te dan un esquema escrito o gráfico','Te narran una historia o ejemplo real','Puedes escuchar grabaciones o ritmos'] },
+
+  // NATURALISTA (5)
+  { id:26, intel:'NA', text:'En una excursión a la naturaleza, tú eres quien...', opts:['Identifica plantas, animales y observa el ecosistema','Fotografía los paisajes con composición artística','Lleva el mapa y organiza la ruta lógicamente','Mantiene el grupo unido y animado'] },
+  { id:27, intel:'NA', text:'¿Cuál de estos temas te genera más curiosidad?', opts:['Cambio climático y conservación del medioambiente','Inteligencia artificial y tecnología','Historia del arte y culturas del mundo','Psicología y comportamiento humano'] },
+  { id:28, intel:'NA', text:'Si tuvieras un proyecto de investigación libre, elegirías...', opts:['Estudiar la biodiversidad de un ecosistema local','Desarrollar un algoritmo o app útil','Investigar la historia de un movimiento artístico','Analizar patrones de comportamiento social'] },
+  { id:29, intel:'NA', text:'¿Cómo describes tu relación con los animales y plantas?', opts:['Me fascinan, tiendo a cuidarlos y observarlos','Son interesantes pero no es mi mayor pasión','Me gustan los que tienen algo peculiar o bello','Prefiero relacionarme con personas'] },
+  { id:30, intel:'NA', text:'Si vieras un problema ambiental en tu comunidad, tu primera reacción sería...', opts:['Investigar la causa raíz y buscar soluciones ecológicas','Diseñar una campaña visual para concientizar','Organizar un grupo de acción comunitaria','Calcular el impacto y proponer datos al municipio'] },
+
+  // INTERPERSONAL (5)
+  { id:31, intel:'IP', text:'En un grupo de amigos, generalmente eres quien...', opts:['Media en los conflictos y escucha a todos','Propone ideas creativas o juegos','Analiza la situación antes de opinar','Se fija en los detalles del entorno'] },
+  { id:32, intel:'IP', text:'¿Qué tipo de actividad te energiza más?', opts:['Trabajar con otras personas hacia un objetivo común','Crear algo de forma individual (escribir, programar, dibujar)','Estar en contacto con la naturaleza','Explorar ideas abstractas en solitario'] },
+  { id:33, intel:'IP', text:'Cuando un amigo está triste, tú...', opts:['Te acercas, escuchas y ofreces apoyo emocional','Le das espacio y recursos útiles para resolver su problema','Le propones actividad física o salir a caminar','Lo entiendes desde la distancia sin intervenir mucho'] },
+  { id:34, intel:'IP', text:'¿Cuál de estas profesiones te atrae más instintivamente?', opts:['Terapeuta, educador o trabajador social','Escritor, periodista o lingüista','Arquitecto, diseñador o fotógrafo','Científico, analista o ingeniero'] },
+  { id:35, intel:'IP', text:'Para ti, el trabajo ideal es...', opts:['Colaborativo, con mucho contacto humano diario','Independiente, donde puedas crear a tu ritmo','Variado, en contacto con el mundo natural','Estructurado, con metas claras y datos medibles'] },
+
+  // INTRAPERSONAL (5)
+  { id:36, intel:'IT', text:'¿Con qué frecuencia reflexionas sobre tus propias emociones y decisiones?', opts:['Con mucha frecuencia, es algo que hago naturalmente','Cuando lo necesito, pero no siempre','Prefiero actuar y ver qué pasa','Prefiero analizar hechos externos más que internos'] },
+  { id:37, intel:'IT', text:'Cuando tomas decisiones importantes, confías principalmente en...', opts:['Tu intuición y valores personales','Un análisis lógico de pros y contras','La opinión y consejo de personas cercanas','Tus instintos y lo que sientes en el cuerpo'] },
+  { id:38, intel:'IT', text:'¿Cuál de estos hábitos tienes o te gustaría tener?', opts:['Escribir un diario personal o meditar','Llevar un registro de metas y avances numéricos','Tener conversaciones profundas con otras personas','Pasar tiempo en la naturaleza para despejarte'] },
+  { id:39, intel:'IT', text:'¿Cómo describirías tu relación contigo mismo?', opts:['Soy muy consciente de quién soy, mis límites y propósito','Soy práctico y me defino más por lo que hago','Soy social y me defino en relación a los demás','Soy curioso sobre el mundo exterior más que el interior'] },
+  { id:40, intel:'IT', text:'Ante un error o fracaso, tu reacción típica es...', opts:['Reflexionar profundamente sobre qué aprender de ello','Analizar qué salió mal con datos concretos','Buscar apoyo y hablar con alguien','Retomarlo físicamente con más energía'] },
+];
+
+// Which answer choice maps to which intelligence (by index 0-3)
+// Each question has a "primary" intelligence and the correct answer that maximally scores it is always index 0
+// Other options give partial scores to other intelligences
+const SCORE_MAP = {
+  // Format: [primary, alt1, alt2, alt3] — each is intelligence id, score given for that choice
+  1:  [['LI',3],['ES',2],['CK',1],['LI',2]],
+  2:  [['LI',3],['LM',2],['MU',2],['CK',2]],
+  3:  [['LI',3],['LM',2],['ES',2],['IP',1]],
+  4:  [['LI',3],['LM',2],['CK',2],['NA',2]],
+  5:  [['LI',3],['LM',2],['ES',2],['NA',2]],
+  6:  [['LM',3],['IP',2],['IT',2],['NA',2]],
+  7:  [['LM',3],['MU',2],['CK',2],['LI',2]],
+  8:  [['LM',3],['ES',2],['IP',2],['MU',2]],
+  9:  [['LM',3],['NA',2],['IT',2],['IP',2]],
+  10: [['LM',3],['LI',2],['CK',2],['NA',2]],
+  11: [['ES',3],['LI',2],['IP',2],['MU',1]],
+  12: [['ES',3],['IP',2],['LM',2],['IT',2]],
+  13: [['ES',3],['LM',2],['MU',2],['IP',2]],
+  14: [['ES',3],['LI',2],['CK',2],['NA',2]],
+  15: [['ES',3],['LI',2],['MU',2],['NA',2]],
+  16: [['MU',3],['LM',2],['CK',2],['ES',2]],
+  17: [['MU',3],['LI',2],['IT',2],['MU',2]],
+  18: [['MU',3],['LI',2],['CK',2],['ES',2]],
+  19: [['MU',2],['LI',2],['IP',3],['LM',2]],
+  20: [['MU',3],['LI',2],['CK',2],['IP',2]],
+  21: [['CK',3],['LI',2],['ES',2],['IP',2]],
+  22: [['CK',3],['LM',2],['ES',2],['LI',2]],
+  23: [['CK',3],['LI',2],['IP',2],['NA',2]],
+  24: [['CK',3],['LM',2],['IP',2],['NA',2]],
+  25: [['CK',3],['ES',2],['LI',2],['MU',2]],
+  26: [['NA',3],['ES',2],['LM',2],['IP',2]],
+  27: [['NA',3],['LM',2],['ES',2],['IP',2]],
+  28: [['NA',3],['LM',2],['ES',2],['IP',2]],
+  29: [['NA',3],['LM',2],['ES',2],['IP',2]],
+  30: [['NA',3],['ES',2],['IP',2],['LM',2]],
+  31: [['IP',3],['ES',2],['LM',2],['NA',2]],
+  32: [['IP',3],['LM',2],['NA',2],['IT',2]],
+  33: [['IP',3],['LM',2],['CK',2],['IT',2]],
+  34: [['IP',3],['LI',2],['ES',2],['LM',2]],
+  35: [['IP',3],['LI',2],['NA',2],['LM',2]],
+  36: [['IT',3],['IP',2],['LM',2],['LI',2]],
+  37: [['IT',3],['LM',2],['IP',2],['CK',2]],
+  38: [['IT',3],['LM',2],['IP',2],['NA',2]],
+  39: [['IT',3],['LM',2],['IP',2],['NA',2]],
+  40: [['IT',3],['LM',2],['IP',2],['CK',2]],
+};
+
+const CAREERS = [
+  { name:'Periodismo & Comunicación', icon:'✍️', intel:['LI','IP'], color:'#6c63ff' },
+  { name:'Derecho & Abogacía',         icon:'⚖️', intel:['LI','LM'], color:'#6c63ff' },
+  { name:'Lingüística & Traducción',   icon:'🌐', intel:['LI','IT'], color:'#6c63ff' },
+  { name:'Ingeniería de Software',     icon:'💻', intel:['LM','ES'], color:'#43e8c2' },
+  { name:'Matemáticas & Estadística',  icon:'📐', intel:['LM','IT'], color:'#43e8c2' },
+  { name:'Economía & Finanzas',        icon:'📈', intel:['LM','IP'], color:'#43e8c2' },
+  { name:'Arquitectura & Diseño',      icon:'🏛️', intel:['ES','LM'], color:'#ff6b9d' },
+  { name:'Diseño Gráfico & UX',        icon:'🖌️', intel:['ES','LI'], color:'#ff6b9d' },
+  { name:'Fotografía & Cine',          icon:'🎬', intel:['ES','MU'], color:'#ff6b9d' },
+  { name:'Producción Musical',         icon:'🎹', intel:['MU','CK'], color:'#f7b731' },
+  { name:'Musicoterapia',              icon:'🎶', intel:['MU','IP'], color:'#f7b731' },
+  { name:'Medicina & Cirugía',         icon:'🏥', intel:['CK','LM'], color:'#ff9f43' },
+  { name:'Educación Física & Deporte', icon:'🏅', intel:['CK','IP'], color:'#ff9f43' },
+  { name:'Fisioterapia & Kinesiología',icon:'🦾', intel:['CK','NA'], color:'#ff9f43' },
+  { name:'Biología & Ecología',        icon:'🔬', intel:['NA','LM'], color:'#1dd1a1' },
+  { name:'Medicina Veterinaria',       icon:'🐾', intel:['NA','IP'], color:'#1dd1a1' },
+  { name:'Ingeniería Ambiental',       icon:'🌱', intel:['NA','LM'], color:'#1dd1a1' },
+  { name:'Psicología',                 icon:'🧠', intel:['IP','IT'], color:'#fd9644' },
+  { name:'Trabajo Social',             icon:'🤲', intel:['IP','NA'], color:'#fd9644' },
+  { name:'Pedagogía & Educación',      icon:'📖', intel:['IP','LI'], color:'#fd9644' },
+  { name:'Filosofía',                  icon:'💭', intel:['IT','LI'], color:'#a29bfe' },
+  { name:'Escritura Creativa',         icon:'🖊️', intel:['IT','LI'], color:'#a29bfe' },
+  { name:'Investigación Científica',   icon:'🔭', intel:['IT','LM'], color:'#a29bfe' },
+];
+
+const PROFILES = [
+  { id:'LI', label:'El Comunicador', icon:'✍️', desc:'Tienes una habilidad natural para el lenguaje. Las palabras son tu herramienta más poderosa; persuades, narras y conectas a través de ellas.' },
+  { id:'LM', label:'El Analítico', icon:'🔢', desc:'Tu mente busca patrones y lógica en todo. Eres un resolvedor de problemas nato que disfruta de la precisión y el razonamiento estructurado.' },
+  { id:'ES', label:'El Creativo Visual', icon:'🎨', desc:'Piensas en imágenes y espacios. Tu imaginación espacial te permite ver el mundo de forma que otros no pueden; eres diseñador por naturaleza.' },
+  { id:'MU', label:'El Artista Sensorial', icon:'🎵', desc:'El sonido y el ritmo son tu lenguaje. Percibes el mundo a través de los sentidos con una profundidad emocional que pocos alcanzan.' },
+  { id:'CK', label:'El Hacedor', icon:'🏃', desc:'Aprendes haciendo. Tu cuerpo es tu mejor herramienta de conocimiento y tu capacidad física e impulsividad práctica te llevan lejos.' },
+  { id:'NA', label:'El Explorador Natural', icon:'🌿', desc:'La naturaleza es tu classroom. Tienes un don especial para observar, clasificar y comprender los sistemas vivos del planeta.' },
+  { id:'IP', label:'El Conector', icon:'🤝', desc:'Las personas son tu mundo. Empatizas, lides y construyes relaciones con una facilidad que inspira a quienes te rodean.' },
+  { id:'IT', label:'El Reflexivo', icon:'🧘', desc:'Tu mayor fortaleza es tu mundo interior. Tienes una conciencia de ti mismo poco común y una capacidad de introspección que guía tus decisiones.' },
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let currentQ = 0;
+let answers = {};
+
+function startAssessment() {
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('assessment').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const total = QUESTIONS.length;
+
+  // Progress
+  const pct = (currentQ / total) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `Pregunta ${currentQ + 1} de ${total}`;
+
+  const intel = INTELLIGENCES.find(i => i.id === q.intel);
+  const container = document.getElementById('questionContainer');
+
+  container.innerHTML = `
+    <div class="card" style="animation-delay:0s">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="q-num">Pregunta ${q.id}</div>
+        <div class="q-intl">${intel.emoji} ${intel.name}</div>
+      </div>
+      <div class="q-text">${q.text}</div>
+      <div class="options" id="options"></div>
+    </div>
+  `;
+
+  const optWrap = document.getElementById('options');
+  q.opts.forEach((opt, idx) => {
+    const div = document.createElement('div');
+    div.className = 'option' + (answers[q.id] === idx ? ' selected' : '');
+    div.innerHTML = `<div class="option-dot"></div><div class="option-text">${opt}</div>`;
+    div.addEventListener('click', () => selectOption(q.id, idx));
+    optWrap.appendChild(div);
+  });
+
+  updateNav();
+}
+
+function selectOption(qId, idx) {
+  answers[qId] = idx;
+  document.querySelectorAll('.option').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+  updateNav();
+}
+
+function updateNav() {
+  const q = QUESTIONS[currentQ];
+  const answered = answers[q.id] !== undefined;
+  const isLast = currentQ === QUESTIONS.length - 1;
+  document.getElementById('btnPrev').style.visibility = currentQ === 0 ? 'hidden' : 'visible';
+  document.getElementById('btnNext').disabled = !answered;
+  document.getElementById('btnNext').style.display = isLast ? 'none' : 'inline-flex';
+  document.getElementById('btnSubmit').style.display = (isLast && answered) ? 'inline-flex' : 'none';
+}
+
+function nextQ() {
+  if (currentQ < QUESTIONS.length - 1) { currentQ++; renderQuestion(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+function prevQ() {
+  if (currentQ > 0) { currentQ--; renderQuestion(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+// ─────────────────────────────────────────────
+// SCORING
+// ─────────────────────────────────────────────
+function computeScores() {
+  const raw = {};
+  INTELLIGENCES.forEach(i => raw[i.id] = 0);
+  QUESTIONS.forEach(q => {
+    const chosen = answers[q.id];
+    if (chosen === undefined) return;
+    const mapping = SCORE_MAP[q.id];
+    const [intId, pts] = mapping[chosen];
+    raw[intId] = (raw[intId] || 0) + pts;
+  });
+
+  // Max possible per intelligence: 5 questions × 3 pts = 15
+  const maxPossible = 15;
+  const pct = {};
+  INTELLIGENCES.forEach(i => { pct[i.id] = Math.min(100, Math.round((raw[i.id] / maxPossible) * 100)); });
+  return pct;
+}
+
+// ─────────────────────────────────────────────
+// RESULTS
+// ─────────────────────────────────────────────
+function showResults() {
+  document.getElementById('assessment').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  const scores = computeScores();
+  const sorted = INTELLIGENCES.map(i => ({ ...i, pct: scores[i.id] })).sort((a,b) => b.pct - a.pct);
+  const top3 = sorted.slice(0, 3);
+  const bottom3 = sorted.slice(-3);
+  const topIntel = sorted[0];
+
+  // Profile badge
+  const profile = PROFILES.find(p => p.id === topIntel.id);
+  document.getElementById('profileBadge').innerHTML = `
+    <div class="profile-icon">${profile.icon}</div>
+    <h2>${profile.label}</h2>
+    <p>${profile.desc}</p>
+  `;
+
+  // Bar chart
+  const barContainer = document.getElementById('barChart');
+  barContainer.innerHTML = '';
+  sorted.forEach(intel => {
+    const div = document.createElement('div');
+    div.className = 'bar-item';
+    div.innerHTML = `
+      <div class="bar-label"><span>${intel.emoji} ${intel.name}</span><span>${intel.pct}%</span></div>
+      <div class="bar-track"><div class="bar-fill" data-pct="${intel.pct}" style="background:${intel.color}"></div></div>
+    `;
+    barContainer.appendChild(div);
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill').forEach(el => { el.style.width = el.dataset.pct + '%'; });
+  }, 100);
+
+  // Radar
+  drawRadar(scores);
+
+  // Strengths & weaknesses
+  const sC = document.getElementById('strengthsContainer');
+  const wC = document.getElementById('weaknessesContainer');
+  sC.innerHTML = '';
+  wC.innerHTML = '';
+  top3.forEach(i => {
+    const tag = document.createElement('span');
+    tag.className = 'sw-tag s';
+    tag.textContent = i.emoji + ' ' + i.name;
+    sC.appendChild(tag);
+  });
+  bottom3.forEach(i => {
+    const tag = document.createElement('span');
+    tag.className = 'sw-tag w';
+    tag.textContent = i.emoji + ' ' + i.name;
+    wC.appendChild(tag);
+  });
+
+  // Careers
+  const topIds = top3.map(i => i.id);
+  const matchedCareers = CAREERS.map(c => {
+    const matchCount = c.intel.filter(id => topIds.includes(id)).length;
+    return { ...c, matchCount };
+  }).filter(c => c.matchCount > 0).sort((a,b) => b.matchCount - a.matchCount).slice(0, 9);
+
+  const cg = document.getElementById('careerGrid');
+  cg.innerHTML = '';
+  matchedCareers.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'career-card';
+    const matchPct = c.matchCount === 2 ? 'Alta' : 'Media';
+    const matchColor = c.matchCount === 2 ? '#43e8c2' : '#f7b731';
+    div.style.cssText = `--cc:${c.color}`;
+    div.innerHTML = `
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c.color}"></div>
+      <div class="career-match" style="background:${matchColor}22;color:${matchColor}">⚡ ${matchPct}</div>
+      <div class="career-icon">${c.icon}</div>
+      <div class="career-name">${c.name}</div>
+      <div class="career-intel">${c.intel.map(id => INTELLIGENCES.find(i=>i.id===id).emoji+' '+INTELLIGENCES.find(i=>i.id===id).name).join(' · ')}</div>
+    `;
+    cg.appendChild(div);
+  });
+}
+
+// ─────────────────────────────────────────────
+// RADAR CHART (Canvas)
+// ─────────────────────────────────────────────
+function drawRadar(scores) {
+  const canvas = document.getElementById('radarCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2;
+  const R = Math.min(W,H)/2 - 36;
+  const N = INTELLIGENCES.length;
+  const angles = INTELLIGENCES.map((_,i) => (Math.PI * 2 / N) * i - Math.PI/2);
+
+  ctx.clearRect(0,0,W,H);
+
+  // Grid circles
+  for (let g = 1; g <= 4; g++) {
+    const r = R * (g/4);
+    ctx.beginPath();
+    angles.forEach((a,i) => {
+      const x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Spokes
+  angles.forEach(a => {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + R*Math.cos(a), cy + R*Math.sin(a));
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+
+  // Data polygon
+  ctx.beginPath();
+  INTELLIGENCES.forEach((intel, i) => {
+    const pct = scores[intel.id] / 100;
+    const r = R * pct;
+    const x = cx + r * Math.cos(angles[i]);
+    const y = cy + r * Math.sin(angles[i]);
+    i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  const grad = ctx.createRadialGradient(cx,cy,0,cx,cy,R);
+  grad.addColorStop(0,'rgba(108,99,255,0.5)');
+  grad.addColorStop(1,'rgba(255,107,157,0.2)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = '#6c63ff';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Dots & labels
+  INTELLIGENCES.forEach((intel, i) => {
+    const pct = scores[intel.id] / 100;
+    const r = R * pct;
+    const x = cx + r * Math.cos(angles[i]);
+    const y = cy + r * Math.sin(angles[i]);
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI*2);
+    ctx.fillStyle = intel.color;
+    ctx.fill();
+
+    // Label
+    const lx = cx + (R+22) * Math.cos(angles[i]);
+    const ly = cy + (R+22) * Math.sin(angles[i]);
+    ctx.font = '13px DM Sans, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(intel.emoji, lx, ly);
+  });
+}
+
+function restartAssessment() {
+  currentQ = 0;
+  answers = {};
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('intro').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─────────────────────────────────────────────
+// PDF EXPORT
+// ─────────────────────────────────────────────
+async function exportPDF() {
+  const btn = document.getElementById('btnExportPdf');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="pdf-icon">⏳</span> Generando PDF...';
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, H = 297;
+  const margin = 18;
+  const contentW = W - margin * 2;
+
+  // ── Recompute scores ──
+  const scores = computeScores();
+  const sorted = INTELLIGENCES.map(i => ({ ...i, pct: scores[i.id] })).sort((a,b) => b.pct - a.pct);
+  const top3 = sorted.slice(0, 3);
+  const bottom3 = sorted.slice(-3);
+  const topIntel = sorted[0];
+  const profile = PROFILES.find(p => p.id === topIntel.id);
+
+  // ── Helpers ──
+  function hexToRgb(hex) {
+    const r = parseInt(hex.slice(1,3),16);
+    const g = parseInt(hex.slice(3,5),16);
+    const b = parseInt(hex.slice(5,7),16);
+    return [r,g,b];
+  }
+  function setFill(hex) { const [r,g,b] = hexToRgb(hex); doc.setFillColor(r,g,b); }
+  function setDraw(hex) { const [r,g,b] = hexToRgb(hex); doc.setDrawColor(r,g,b); }
+  function setTextColor(hex) { const [r,g,b] = hexToRgb(hex); doc.setTextColor(r,g,b); }
+  function pill(x, y, w, h, hex) {
+    setFill(hex); doc.roundedRect(x, y, w, h, h/2, h/2, 'F');
+  }
+
+  // ═══════════════════════════════
+  // PAGE 1 — COVER & PROFILE
+  // ═══════════════════════════════
+
+  // Dark background
+  setFill('#0d0f1a'); doc.rect(0, 0, W, H, 'F');
+
+  // Accent top strip
+  const grad1 = doc.linearGradient ? null : null; // jsPDF basic, use solid
+  setFill('#6c63ff'); doc.rect(0, 0, W, 2.5, 'F');
+
+  // Decorative orb circles (subtle)
+  doc.setGState(doc.GState({ opacity: 0.08 }));
+  setFill('#6c63ff'); doc.circle(185, 40, 55, 'F');
+  setFill('#ff6b9d'); doc.circle(25, 220, 45, 'F');
+  setFill('#43e8c2'); doc.circle(105, 148, 30, 'F');
+  doc.setGState(doc.GState({ opacity: 1 }));
+
+  // Badge
+  pill(margin, 28, 55, 7, '#1c1f35');
+  setDraw('#6c63ff'); doc.setLineWidth(0.3);
+  doc.roundedRect(margin, 28, 55, 7, 3.5, 3.5, 'S');
+  setTextColor('#6c63ff'); doc.setFontSize(6.5); doc.setFont('helvetica','bold');
+  doc.text('ORIENTACIÓN VOCACIONAL', margin + 27.5, 33, { align:'center' });
+
+  // Title
+  setTextColor('#ffffff'); doc.setFontSize(28); doc.setFont('helvetica','bold');
+  doc.text('Perfil de', margin, 52);
+  setTextColor('#6c63ff');
+  doc.text('Inteligencias', margin, 64);
+  setTextColor('#ffffff');
+  doc.text('Múltiples', margin, 76);
+
+  // Subtitle
+  setTextColor('#8b90a8'); doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('Basado en la Teoría de Howard Gardner', margin, 86);
+
+  // Horizontal rule
+  setDraw('#1c1f35'); doc.setLineWidth(0.5);
+  doc.line(margin, 93, W - margin, 93);
+
+  // ── Profile Card ──
+  setFill('#141625'); doc.roundedRect(margin, 98, contentW, 52, 4, 4, 'F');
+  setDraw('#1c1f35'); doc.setLineWidth(0.3);
+  doc.roundedRect(margin, 98, contentW, 52, 4, 4, 'S');
+
+  // Profile accent bar
+  setFill(topIntel.color); doc.roundedRect(margin, 98, 3.5, 52, 2, 2, 'F');
+
+  // Profile icon area
+  setFill('#1c1f35'); doc.circle(margin + 18, 124, 11, 'F');
+  doc.setFontSize(14);
+  doc.text(profile.icon, margin + 18, 127.5, { align:'center' });
+
+  // Profile text
+  setTextColor('#a29bfe'); doc.setFontSize(7); doc.setFont('helvetica','bold');
+  doc.text('PERFIL DOMINANTE', margin + 34, 106);
+  setTextColor('#ffffff'); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(profile.label, margin + 34, 116);
+  setTextColor('#8b90a8'); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  const profileLines = doc.splitTextToSize(profile.desc, contentW - 38);
+  doc.text(profileLines, margin + 34, 124);
+
+  // ── Score Summary Grid (top 3 + bottom 3) ──
+  let gy = 160;
+  setTextColor('#e8eaf0'); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text('Resumen de Puntuaciones', margin, gy);
+  gy += 6;
+
+  const colW = (contentW - 4) / 2;
+  sorted.forEach((intel, idx) => {
+    const col = idx % 2;
+    const row = Math.floor(idx / 2);
+    const x = margin + col * (colW + 4);
+    const y = gy + row * 16;
+
+    setFill('#141625'); doc.roundedRect(x, y, colW, 13, 2, 2, 'F');
+
+    // Color dot
+    setFill(intel.color); doc.circle(x + 5, y + 6.5, 2.2, 'F');
+
+    // Name
+    setTextColor('#e8eaf0'); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+    doc.text(intel.name, x + 10, y + 5.5);
+
+    // Bar track
+    setFill('#1c1f35'); doc.roundedRect(x + 10, y + 7.5, colW - 20, 2.5, 1, 1, 'F');
+    // Bar fill
+    const barW = Math.max(1, (intel.pct / 100) * (colW - 20));
+    setFill(intel.color); doc.roundedRect(x + 10, y + 7.5, barW, 2.5, 1, 1, 'F');
+
+    // Pct
+    setTextColor(intel.color); doc.setFontSize(7); doc.setFont('helvetica','bold');
+    doc.text(intel.pct + '%', x + colW - 8, y + 5.5);
+  });
+
+  gy += Math.ceil(sorted.length / 2) * 16 + 6;
+
+  // ── Footer page 1 ──
+  setTextColor('#3a3f5c'); doc.setFontSize(7); doc.setFont('helvetica','normal');
+  doc.text('Assessment Vocacional · Inteligencias Múltiples de Howard Gardner', W/2, H - 10, { align:'center' });
+  setFill('#6c63ff'); doc.rect(0, H - 2, W, 2, 'F');
+
+  // ═══════════════════════════════
+  // PAGE 2 — CHARTS & CAREERS
+  // ═══════════════════════════════
+  doc.addPage();
+  setFill('#0d0f1a'); doc.rect(0, 0, W, H, 'F');
+  setFill('#6c63ff'); doc.rect(0, 0, W, 2.5, 'F');
+
+  // Orbs
+  doc.setGState(doc.GState({ opacity: 0.06 }));
+  setFill('#43e8c2'); doc.circle(180, 60, 50, 'F');
+  setFill('#a29bfe'); doc.circle(30, 180, 40, 'F');
+  doc.setGState(doc.GState({ opacity: 1 }));
+
+  let y2 = 20;
+
+  // ── Radar from canvas ──
+  setTextColor('#e8eaf0'); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text('Mapa Radar · Perfil de Inteligencias', margin, y2); y2 += 6;
+
+  // Draw radar manually in PDF
+  const radarR = 38, rcx = margin + 46, rcy = y2 + 44;
+  const angles8 = INTELLIGENCES.map((_,i) => (Math.PI*2/8)*i - Math.PI/2);
+
+  // Grid circles
+  for (let g = 1; g <= 4; g++) {
+    const r = radarR * (g/4);
+    doc.setGState(doc.GState({ opacity: 0.15 }));
+    setDraw('#ffffff'); doc.setLineWidth(0.3);
+    const pts = angles8.map(a => ({ x: rcx + r*Math.cos(a), y: rcy + r*Math.sin(a) }));
+    for (let p = 0; p < pts.length; p++) {
+      const n = (p+1) % pts.length;
+      doc.line(pts[p].x, pts[p].y, pts[n].x, pts[n].y);
+    }
+    doc.setGState(doc.GState({ opacity: 1 }));
+  }
+
+  // Spokes
+  doc.setGState(doc.GState({ opacity: 0.1 }));
+  setDraw('#ffffff'); doc.setLineWidth(0.2);
+  angles8.forEach(a => { doc.line(rcx, rcy, rcx + radarR*Math.cos(a), rcy + radarR*Math.sin(a)); });
+  doc.setGState(doc.GState({ opacity: 1 }));
+
+  // Data polygon fill
+  const dataPts = INTELLIGENCES.map((intel, i) => {
+    const pct = scores[intel.id] / 100;
+    return { x: rcx + radarR*pct*Math.cos(angles8[i]), y: rcy + radarR*pct*Math.sin(angles8[i]) };
+  });
+  doc.setGState(doc.GState({ opacity: 0.35 }));
+  setFill('#6c63ff');
+  doc.moveTo(dataPts[0].x, dataPts[0].y);
+  dataPts.forEach(p => doc.lineTo(p.x, p.y));
+  doc.closePath(); doc.fill();
+  doc.setGState(doc.GState({ opacity: 1 }));
+
+  // Data polygon stroke
+  setDraw('#6c63ff'); doc.setLineWidth(0.8);
+  for (let p = 0; p < dataPts.length; p++) {
+    const n = (p+1) % dataPts.length;
+    doc.line(dataPts[p].x, dataPts[p].y, dataPts[n].x, dataPts[n].y);
+  }
+
+  // Dots
+  INTELLIGENCES.forEach((intel, i) => {
+    const pt = dataPts[i];
+    setFill(intel.color); doc.circle(pt.x, pt.y, 1.5, 'F');
+  });
+
+  // Labels around radar
+  INTELLIGENCES.forEach((intel, i) => {
+    const lx = rcx + (radarR + 10) * Math.cos(angles8[i]);
+    const ly = rcy + (radarR + 10) * Math.sin(angles8[i]);
+    setTextColor(intel.color); doc.setFontSize(5.5); doc.setFont('helvetica','bold');
+    const shortName = intel.name.split('-')[0].slice(0,7);
+    doc.text(shortName, lx, ly + 1, { align:'center' });
+  });
+
+  // ── Horizontal bar chart beside radar ──
+  const bx = margin + 100, bStartY = y2;
+  setTextColor('#e8eaf0'); doc.setFontSize(8.5); doc.setFont('helvetica','bold');
+  doc.text('Puntuación por Inteligencia', bx, bStartY);
+
+  sorted.forEach((intel, idx) => {
+    const by = bStartY + 8 + idx * 11;
+    // Name
+    setTextColor('#c8cad4'); doc.setFontSize(6.5); doc.setFont('helvetica','normal');
+    doc.text(intel.emoji + ' ' + intel.name.slice(0,14), bx, by + 2.5);
+    // Track
+    const trackW = W - margin - bx - 18;
+    setFill('#1c1f35'); doc.roundedRect(bx, by + 4, trackW, 3, 1.5, 1.5, 'F');
+    // Fill
+    const fw = Math.max(1, (intel.pct / 100) * trackW);
+    setFill(intel.color); doc.roundedRect(bx, by + 4, fw, 3, 1.5, 1.5, 'F');
+    // Pct label
+    setTextColor(intel.color); doc.setFontSize(6); doc.setFont('helvetica','bold');
+    doc.text(intel.pct + '%', W - margin - 1, by + 6.5, { align:'right' });
+  });
+
+  y2 += 96;
+
+  // ── Strengths & Weaknesses ──
+  setTextColor('#e8eaf0'); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text('Fortalezas y Áreas de Mejora', margin, y2); y2 += 7;
+
+  const halfW = (contentW - 5) / 2;
+
+  // Strengths card
+  setFill('#141625'); doc.roundedRect(margin, y2, halfW, 30, 3, 3, 'F');
+  setFill('#43e8c2'); doc.roundedRect(margin, y2, halfW, 1.5, 0.75, 0.75, 'F');
+  setTextColor('#43e8c2'); doc.setFontSize(7); doc.setFont('helvetica','bold');
+  doc.text('⚡ FORTALEZAS', margin + 5, y2 + 8);
+  top3.forEach((intel, i) => {
+    setFill(intel.color+'22'); doc.roundedRect(margin + 5, y2 + 11 + i*6, halfW - 10, 5, 2.5, 2.5, 'F');
+    setTextColor(intel.color); doc.setFontSize(7); doc.setFont('helvetica','bold');
+    doc.text(intel.emoji + ' ' + intel.name, margin + 8, y2 + 14.5 + i*6);
+  });
+
+  // Weaknesses card
+  const wx = margin + halfW + 5;
+  setFill('#141625'); doc.roundedRect(wx, y2, halfW, 30, 3, 3, 'F');
+  setFill('#ff6b9d'); doc.roundedRect(wx, y2, halfW, 1.5, 0.75, 0.75, 'F');
+  setTextColor('#ff6b9d'); doc.setFontSize(7); doc.setFont('helvetica','bold');
+  doc.text('🌱 ÁREAS DE MEJORA', wx + 5, y2 + 8);
+  bottom3.forEach((intel, i) => {
+    setFill(intel.color+'22'); doc.roundedRect(wx + 5, y2 + 11 + i*6, halfW - 10, 5, 2.5, 2.5, 'F');
+    setTextColor(intel.color); doc.setFontSize(7); doc.setFont('helvetica','bold');
+    doc.text(intel.emoji + ' ' + intel.name, wx + 8, y2 + 14.5 + i*6);
+  });
+
+  y2 += 38;
+
+  // ── Career Recommendations ──
+  setTextColor('#e8eaf0'); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text('🎯 Carreras Recomendadas', margin, y2); y2 += 7;
+
+  const topIds = top3.map(i => i.id);
+  const matchedCareers = CAREERS.map(c => {
+    const matchCount = c.intel.filter(id => topIds.includes(id)).length;
+    return { ...c, matchCount };
+  }).filter(c => c.matchCount > 0).sort((a,b) => b.matchCount - a.matchCount).slice(0, 9);
+
+  const cCols = 3, cColW = (contentW - 4) / cCols, cRowH = 18;
+  matchedCareers.forEach((career, idx) => {
+    const col = idx % cCols;
+    const row = Math.floor(idx / cCols);
+    const cx2 = margin + col * (cColW + 2);
+    const cy2 = y2 + row * (cRowH + 3);
+
+    setFill('#141625'); doc.roundedRect(cx2, cy2, cColW, cRowH, 2, 2, 'F');
+
+    // Top accent
+    const [r,g,b] = hexToRgb(career.color);
+    doc.setFillColor(r,g,b); doc.roundedRect(cx2, cy2, cColW, 1.5, 0.75, 0.75, 'F');
+
+    // Match badge
+    const isHigh = career.matchCount === 2;
+    const badgeColor = isHigh ? '#43e8c2' : '#f7b731';
+    const [br,bg2,bb] = hexToRgb(badgeColor);
+    doc.setFillColor(br, bg2, bb, 0.15);
+    doc.roundedRect(cx2 + cColW - 18, cy2 + 3, 16, 4.5, 2, 2, 'F');
+    setTextColor(badgeColor); doc.setFontSize(5.5); doc.setFont('helvetica','bold');
+    doc.text(isHigh ? '⚡ Alta' : '· Media', cx2 + cColW - 10, cy2 + 6.2, { align:'center' });
+
+    // Icon
+    doc.setFontSize(9);
+    setTextColor('#ffffff');
+    doc.text(career.icon, cx2 + 4, cy2 + 9);
+
+    // Name
+    setTextColor('#e8eaf0'); doc.setFontSize(6.5); doc.setFont('helvetica','bold');
+    const cName = doc.splitTextToSize(career.name, cColW - 22);
+    doc.text(cName, cx2 + 11, cy2 + 9);
+
+    // Intel tags
+    setTextColor('#8b90a8'); doc.setFontSize(5.5); doc.setFont('helvetica','normal');
+    const intelText = career.intel.map(id => INTELLIGENCES.find(i=>i.id===id).name.split('-')[0]).join(' · ');
+    doc.text(intelText, cx2 + 4, cy2 + 15);
+  });
+
+  y2 += Math.ceil(matchedCareers.length / cCols) * (cRowH + 3) + 6;
+
+  // ── Recommendation note ──
+  if (y2 < H - 30) {
+    setFill('#141625'); doc.roundedRect(margin, y2, contentW, 16, 3, 3, 'F');
+    setFill('#6c63ff'); doc.roundedRect(margin, y2, 3, 16, 1.5, 1.5, 'F');
+    setTextColor('#a29bfe'); doc.setFontSize(7); doc.setFont('helvetica','bold');
+    doc.text('💡 Nota orientadora', margin + 7, y2 + 6);
+    setTextColor('#8b90a8'); doc.setFontSize(6.5); doc.setFont('helvetica','normal');
+    const note = 'Este perfil es una guía basada en tus preferencias actuales. Te recomendamos conversarlo con un orientador académico para profundizar en tu vocación.';
+    const noteLines = doc.splitTextToSize(note, contentW - 12);
+    doc.text(noteLines, margin + 7, y2 + 12);
+  }
+
+  // Footer page 2
+  setTextColor('#3a3f5c'); doc.setFontSize(7); doc.setFont('helvetica','normal');
+  doc.text('Assessment Vocacional · Inteligencias Múltiples de Howard Gardner', W/2, H - 10, { align:'center' });
+  setFill('#6c63ff'); doc.rect(0, H - 2, W, 2, 'F');
+
+  // ── Save ──
+  const timestamp = new Date().toLocaleDateString('es-ES').replace(/\//g,'-');
+  doc.save(`perfil-vocacional-${timestamp}.pdf`);
+
+  btn.disabled = false;
+  btn.innerHTML = '<span class="pdf-icon">📄</span> Exportar resultado en PDF';
+
+  // Toast
+  const toast = document.getElementById('pdfToast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
